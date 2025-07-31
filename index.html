@@ -1,133 +1,242 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Employee Portal</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; }
-    .tab { display: none; }
-    .tab.active { display: block; }
-    .tabs button {
-      padding: 10px; margin: 2px;
-      background: #007bff; color: #fff; border: none; cursor: pointer;
-    }
-    input, select, textarea {
-      width: 100%; padding: 10px; margin: 8px 0;
-      box-sizing: border-box;
-    }
-    .btn { background: #28a745; color: white; border: none; padding: 10px; width: 100%; margin-top: 10px; cursor: pointer; }
-    #status { margin-top: 15px; padding: 10px; display: none; border-radius: 5px; text-align: center; }
-    #status.success { background: #d4edda; color: #155724; }
-    #status.error { background: #f8d7da; color: #721c24; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Employee Portal</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  h2 {
+    text-align: center;
+  }
+  .tabs {
+    display: flex;
+    margin-bottom: 15px;
+    cursor: pointer;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px;
+    background: #eee;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    text-align: center;
+  }
+  .tab.active {
+    background: white;
+    font-weight: bold;
+  }
+  .tab-content {
+    border: 1px solid #ccc;
+    padding: 15px;
+    background: white;
+  }
+  label {
+    display: block;
+    margin: 10px 0 5px;
+  }
+  input, select, textarea, button {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+  }
+  button {
+    background-color: #2a9df4;
+    border: none;
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  #status {
+    margin-top: 10px;
+    padding: 10px;
+    text-align: center;
+    border-radius: 4px;
+    display: none;
+  }
+  #status.success {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  #status.error {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+</style>
 </head>
 <body>
 
-  <div class="tabs">
-    <button onclick="showTab('attendance')">Attendance</button>
-    <button onclick="showTab('leave')">Leave Request</button>
-    <button onclick="showTab('salary')">Salary Advance</button>
-  </div>
+<h2>Employee Portal</h2>
 
-  <div id="attendance" class="tab active">
-    <h2>Attendance</h2>
-    <input id="empId" placeholder="Employee ID" />
-    <button class="btn" onclick="submitAttendance('Clock In')">Clock In</button>
-    <button class="btn" onclick="submitAttendance('Clock Out')">Clock Out</button>
-     <button class="leave" onclick="sendAttendance('Leave')">Mark Leave</button>
-  </div>
+<div class="tabs">
+  <div class="tab active" data-tab="attendance">Attendance</div>
+  <div class="tab" data-tab="leave">Leave Request</div>
+  <div class="tab" data-tab="salary">Salary Advance</div>
+</div>
 
-  <div id="leave" class="tab">
-    <h2>Leave Request</h2>
-    <input id="leaveName" placeholder="Employee Name" />
-    <input id="leaveFrom" type="date" />
-    <input id="leaveTo" type="date" />
-    <input id="leaveDays" placeholder="Number of Days" type="number" />
-    <select id="leaveType">
-      <option value="Medical">Medical</option>
-      <option value="Study">Study</option>
-      <option value="Personal">Personal</option>
-      <option value="Funeral">Funeral</option>
-      <option value="Other">Other</option>
-    </select>
-    <textarea id="leaveReason" placeholder="Reason for Leave"></textarea>
-    <button class="btn" onclick="submitLeave()">Submit Leave Request</button>
-  </div>
+<div id="attendance" class="tab-content">
+  <label for="att-employeeId">Employee ID</label>
+  <input type="text" id="att-employeeId" placeholder="Enter Employee ID" />
 
-  <div id="salary" class="tab">
-    <h2>Salary Advance Request</h2>
-    <input id="salaryName" placeholder="Employee Name" />
-    <input id="salaryAmount" placeholder="Advance Amount" type="number" />
-    <button class="btn" onclick="submitSalary()">Submit Salary Advance</button>
-  </div>
+  <button onclick="sendAttendance('Clock In')">Clock In</button>
+  <button onclick="sendAttendance('Clock Out')">Clock Out</button>
+  <button onclick="sendAttendance('Leave')">Mark Leave</button>
+</div>
 
-  <div id="status"></div>
+<div id="leave" class="tab-content" style="display:none;">
+  <label for="leave-employeeId">Employee ID</label>
+  <input type="text" id="leave-employeeId" placeholder="Enter Employee ID" />
 
-  <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxmaz0XQ-SAibxe8liz8KXD7YxU_4E31IvBrmKKyvZYmLCzX-cYteP35tQyFZh3ADiAKw/exec";
+  <label for="leave-requestDate">Request Date</label>
+  <input type="date" id="leave-requestDate" />
 
-    function showTab(tabId) {
-      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      document.getElementById('status').style.display = 'none';
+  <label for="leave-from">Leave From</label>
+  <input type="date" id="leave-from" />
+
+  <label for="leave-to">Leave To</label>
+  <input type="date" id="leave-to" />
+
+  <label for="leave-days">Number of Days</label>
+  <input type="number" id="leave-days" min="1" />
+
+  <label for="leave-type">Type of Leave</label>
+  <select id="leave-type">
+    <option value="">-- Select --</option>
+    <option value="Study">Study</option>
+    <option value="Medical">Medical</option>
+    <option value="Personal">Personal</option>
+    <option value="Funeral">Funeral</option>
+    <option value="Other">Other</option>
+  </select>
+
+  <label for="leave-reason">Reason for Leave</label>
+  <textarea id="leave-reason" rows="3" placeholder="Reason"></textarea>
+
+  <button onclick="sendLeaveRequest()">Submit Leave Request</button>
+</div>
+
+<div id="salary" class="tab-content" style="display:none;">
+  <label for="salary-employeeId">Employee ID</label>
+  <input type="text" id="salary-employeeId" placeholder="Enter Employee ID" />
+
+  <label for="salary-requestDate">Request Date</label>
+  <input type="date" id="salary-requestDate" />
+
+  <label for="salary-amount">Amount</label>
+  <input type="number" id="salary-amount" min="1" placeholder="Amount" />
+
+  <button onclick="sendSalaryAdvance()">Submit Salary Advance Request</button>
+</div>
+
+<div id="status"></div>
+
+<script>
+  const WEB_APP_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec"; // Replace with your actual URL
+
+  // Tab switching logic
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelector('.tab.active').classList.remove('active');
+      tab.classList.add('active');
+
+      document.querySelectorAll('.tab-content').forEach(tc => tc.style.display = 'none');
+      document.getElementById(tab.dataset.tab).style.display = 'block';
+      clearStatus();
+    });
+  });
+
+  function updateStatus(message, isSuccess) {
+    const status = document.getElementById('status');
+    status.style.display = 'block';
+    status.textContent = message;
+    status.className = isSuccess ? 'success' : 'error';
+  }
+  function clearStatus() {
+    const status = document.getElementById('status');
+    status.style.display = 'none';
+    status.textContent = '';
+    status.className = '';
+  }
+
+  // Attendance functions
+  function sendAttendance(action) {
+    clearStatus();
+    const employeeId = document.getElementById('att-employeeId').value.trim();
+    if (!employeeId) {
+      updateStatus('Please enter your Employee ID.', false);
+      return;
     }
-
-    function updateStatus(msg, success = true) {
-      const status = document.getElementById("status");
-      status.textContent = msg;
-      status.className = success ? 'success' : 'error';
-      status.style.display = "block";
-    }
-
-    async function sendData(data) {
-      try {
-        const res = await fetch(WEB_APP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
-        const result = await res.json();
-        if (result.status === "success") {
-          updateStatus("Submitted successfully", true);
+    const url = `${WEB_APP_URL}?type=attendance&employeeId=${encodeURIComponent(employeeId)}&action=${encodeURIComponent(action)}`;
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          updateStatus(`Successfully recorded ${action} for Employee ID ${employeeId}.`, true);
+          document.getElementById('att-employeeId').value = '';
         } else {
-          updateStatus(result.message || "Submission failed", false);
+          updateStatus('Failed to record attendance: ' + (data.error || 'Unknown error'), false);
         }
-      } catch (err) {
-        updateStatus("Error: " + err.message, false);
-      }
+      })
+      .catch(err => updateStatus('Error sending data: ' + err.message, false));
+  }
+
+  // Leave Request function
+  function sendLeaveRequest() {
+    clearStatus();
+    const employeeId = document.getElementById('leave-employeeId').value.trim();
+    const requestDate = document.getElementById('leave-requestDate').value;
+    const leaveFrom = document.getElementById('leave-from').value;
+    const leaveTo = document.getElementById('leave-to').value;
+    const days = document.getElementById('leave-days').value;
+    const leaveType = document.getElementById('leave-type').value;
+    const reason = document.getElementById('leave-reason').value.trim();
+
+    if (!employeeId || !requestDate || !leaveFrom || !leaveTo || !days || !leaveType || !reason) {
+      updateStatus('Please fill in all fields.', false);
+      return;
     }
 
-    function submitAttendance(action) {
-      const employeeId = document.getElementById("empId").value.trim();
-      if (!employeeId) return updateStatus("Enter Employee ID", false);
-      sendData({ type: "Attendance", employeeId, action });
+    const url = `${WEB_APP_URL}?type=leave&employeeId=${encodeURIComponent(employeeId)}&requestDate=${encodeURIComponent(requestDate)}&leaveFrom=${encodeURIComponent(leaveFrom)}&leaveTo=${encodeURIComponent(leaveTo)}&days=${encodeURIComponent(days)}&leaveType=${encodeURIComponent(leaveType)}&reason=${encodeURIComponent(reason)}`;
+
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          updateStatus('Leave request submitted successfully.', true);
+          document.getElementById('leave-employeeId').value = '';
+          document.getElementById('leave-requestDate').value = '';
+          document.getElementById('leave-from').value = '';
+          document.getElementById('leave-to').value = '';
+          document.getElementById('leave-days').value = '';
+          document.getElementById('leave-type').value = '';
+          document.getElementById('leave-reason').value = '';
+        } else {
+          updateStatus('Failed to submit leave request: ' + (data.error || 'Unknown error'), false);
+        }
+      })
+      .catch(err => updateStatus('Error sending data: ' + err.message, false));
+  }
+
+  // Salary Advance function
+  function sendSalaryAdvance() {
+    clearStatus();
+    const employeeId = document.getElementById('salary-employeeId').value.trim();
+    const requestDate = document.getElementById('salary-requestDate').value;
+    const amount = document.getElementById('salary-amount').value;
+
+    if (!employeeId || !requestDate || !amount) {
+      updateStatus('Please fill in all fields.', false);
+      return;
     }
 
-    function submitLeave() {
-      const data = {
-        type: "Leave",
-        name: document.getElementById("leaveName").value.trim(),
-        from: document.getElementById("leaveFrom").value,
-        to: document.getElementById("leaveTo").value,
-        days: document.getElementById("leaveDays").value,
-        leaveType: document.getElementById("leaveType").value,
-        reason: document.getElementById("leaveReason").value.trim()
-      };
-      if (!data.name || !data.from || !data.to || !data.days) {
-        return updateStatus("Please fill all required fields", false);
-      }
-      sendData(data);
-    }
-
-    function submitSalary() {
-      const name = document.getElementById("salaryName").value.trim();
-      const amount = document.getElementById("salaryAmount").value.trim();
-      if (!name || !amount) return updateStatus("Fill in all fields", false);
-      sendData({ type: "SalaryAdvance", name, amount });
-    }
-  </script>
-
-</body>
-</html>
+    const url = `${WEB
