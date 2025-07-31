@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Employee Portal</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; }
+    .tab { display: none; }
+    .tab.active { display: block; }
+    .tabs button {
+      padding: 10px; margin: 2px;
+      background: #007bff; color: #fff; border: none; cursor: pointer;
+    }
+    input, select, textarea {
+      width: 100%; padding: 10px; margin: 8px 0;
+      box-sizing: border-box;
+    }
+    .btn { background: #28a745; color: white; border: none; padding: 10px; width: 100%; margin-top: 10px; cursor: pointer; }
+    #status { margin-top: 15px; padding: 10px; display: none; border-radius: 5px; text-align: center; }
+    #status.success { background: #d4edda; color: #155724; }
+    #status.error { background: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+
+  <div class="tabs">
+    <button onclick="showTab('attendance')">Attendance</button>
+    <button onclick="showTab('leave')">Leave Request</button>
+    <button onclick="showTab('salary')">Salary Advance</button>
+  </div>
+
+  <div id="attendance" class="tab active">
+    <h2>Attendance</h2>
+    <input id="empId" placeholder="Employee ID" />
+    <button class="btn" onclick="submitAttendance('Clock In')">Clock In</button>
+    <button class="btn" onclick="submitAttendance('Clock Out')">Clock Out</button>
+  </div>
+
+  <div id="leave" class="tab">
+    <h2>Leave Request</h2>
+    <input id="leaveName" placeholder="Employee Name" />
+    <input id="leaveFrom" type="date" />
+    <input id="leaveTo" type="date" />
+    <input id="leaveDays" placeholder="Number of Days" type="number" />
+    <select id="leaveType">
+      <option value="Medical">Medical</option>
+      <option value="Study">Study</option>
+      <option value="Personal">Personal</option>
+      <option value="Funeral">Funeral</option>
+      <option value="Other">Other</option>
+    </select>
+    <textarea id="leaveReason" placeholder="Reason for Leave"></textarea>
+    <button class="btn" onclick="submitLeave()">Submit Leave Request</button>
+  </div>
+
+  <div id="salary" class="tab">
+    <h2>Salary Advance Request</h2>
+    <input id="salaryName" placeholder="Employee Name" />
+    <input id="salaryAmount" placeholder="Advance Amount" type="number" />
+    <button class="btn" onclick="submitSalary()">Submit Salary Advance</button>
+  </div>
+
+  <div id="status"></div>
+
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxmaz0XQ-SAibxe8liz8KXD7YxU_4E31IvBrmKKyvZYmLCzX-cYteP35tQyFZh3ADiAKw/exec";
+
+    function showTab(tabId) {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      document.getElementById('status').style.display = 'none';
+    }
+
+    function updateStatus(msg, success = true) {
+      const status = document.getElementById("status");
+      status.textContent = msg;
+      status.className = success ? 'success' : 'error';
+      status.style.display = "block";
+    }
+
+    async function sendData(data) {
+      try {
+        const res = await fetch(WEB_APP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (result.status === "success") {
+          updateStatus("Submitted successfully", true);
+        } else {
+          updateStatus(result.message || "Submission failed", false);
+        }
+      } catch (err) {
+        updateStatus("Error: " + err.message, false);
+      }
+    }
+
+    function submitAttendance(action) {
+      const employeeId = document.getElementById("empId").value.trim();
+      if (!employeeId) return updateStatus("Enter Employee ID", false);
+      sendData({ type: "Attendance", employeeId, action });
+    }
+
+    function submitLeave() {
+      const data = {
+        type: "Leave",
+        name: document.getElementById("leaveName").value.trim(),
+        from: document.getElementById("leaveFrom").value,
+        to: document.getElementById("leaveTo").value,
+        days: document.getElementById("leaveDays").value,
+        leaveType: document.getElementById("leaveType").value,
+        reason: document.getElementById("leaveReason").value.trim()
+      };
+      if (!data.name || !data.from || !data.to || !data.days) {
+        return updateStatus("Please fill all required fields", false);
+      }
+      sendData(data);
+    }
+
+    function submitSalary() {
+      const name = document.getElementById("salaryName").value.trim();
+      const amount = document.getElementById("salaryAmount").value.trim();
+      if (!name || !amount) return updateStatus("Fill in all fields", false);
+      sendData({ type: "SalaryAdvance", name, amount });
+    }
+  </script>
+
+</body>
+</html>
