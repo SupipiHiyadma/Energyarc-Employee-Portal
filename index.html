@@ -40,13 +40,14 @@
       color: white;
       font-weight: bold;
       cursor: pointer;
+      margin-bottom: 10px;
     }
     .att-action-btn {
-      width: auto;
-      flex: 1;
+      width: 100%; /* changed to full width for vertical stacking */
     }
     #att-buttons {
       display: flex;
+      flex-direction: column; /* vertical layout */
       gap: 10px;
       margin-top: -10px;
       margin-bottom: 20px;
@@ -59,22 +60,6 @@
     }
     #status.success { background-color: #d4edda; color: #155724; }
     #status.error { background-color: #f8d7da; color: #721c24; }
-
-    /* Spinner CSS */
-    @keyframes spinner {
-      to {transform: rotate(360deg);}
-    }
-    .spinner {
-      width: 18px;
-      height: 18px;
-      border: 3px solid #ccc;
-      border-top-color: #007bff;
-      border-radius: 50%;
-      animation: spinner 0.6s linear infinite;
-      display: inline-block;
-      vertical-align: middle;
-      margin-right: 8px;
-    }
   </style>
 </head>
 <body>
@@ -93,9 +78,9 @@
   <label for="attendanceEmployeeId">Employee ID:</label>
   <input type="text" id="attendanceEmployeeId" placeholder="Enter Employee ID" />
   <div id="att-buttons">
-    <button type="button" class="att-action-btn" style="background:#5bc0de;" onclick="sendAttendance('ClockIn', this)">Clock In</button>
-    <button type="button" class="att-action-btn" onclick="sendAttendance('ClockOut', this)">Clock Out</button>
-    <button type="button" class="att-action-btn" style="background:#f44336;" onclick="sendAttendance('Leave', this)">Leave</button>
+    <button type="button" class="att-action-btn" style="background:#5bc0de;" onclick="sendAttendance('ClockIn')">Clock In</button>
+    <button type="button" class="att-action-btn" onclick="sendAttendance('ClockOut')">Clock Out</button>
+    <button type="button" class="att-action-btn" style="background:#f44336;" onclick="sendAttendance('Leave')">Leave</button>
   </div>
 </form>
 
@@ -161,13 +146,9 @@
     status.className = '';
   }
 
-  function showStatus(message, isSuccess = true, isLoading = false) {
+  function showStatus(message, isSuccess = true) {
     const status = document.getElementById('status');
-    if (isLoading) {
-      status.innerHTML = `<span class="spinner"></span> ${message}`;
-    } else {
-      status.textContent = message;
-    }
+    status.textContent = message;
     status.className = isSuccess ? 'success' : 'error';
     status.style.display = 'block';
   }
@@ -184,41 +165,24 @@
     });
   });
 
-  function sendAttendance(action, btn) {
+  function sendAttendance(action) {
     clearStatus();
     const employeeId = document.getElementById("attendanceEmployeeId").value.trim();
     if (!employeeId) return showStatus("Please enter Employee ID", false);
 
-    // Disable clicked button
-    btn.disabled = true;
-
-    // Show loading with spinner
-    showStatus("Processing " + action + "...", true, true);
-
     fetch(`${scriptURL}?type=attendance&employeeId=${encodeURIComponent(employeeId)}&action=${encodeURIComponent(action)}`)
-      .then(res => {
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        return res.json();
-      })
+      .then(res => res.json())
       .then(data => {
+        const actionText = action === 'ClockIn' ? 'Clock In' :
+                           action === 'ClockOut' ? 'Clock Out' :
+                           action === 'Leave' ? 'Leave' : action;
         if (data.status === 'success') {
-          const messages = {
-            ClockIn: "Successfully recorded Clock In",
-            ClockOut: "Successfully recorded Clock Out",
-            Leave: "Successfully recorded Leave",
-          };
-          showStatus(messages[action] || `Attendance: ${data.status}`, true);
+          showStatus(`Successfully recorded ${actionText}`, true);
         } else {
-          showStatus(`Failed to record attendance: ${data.message || 'Unknown error'}`, false);
+          showStatus(`Failed to record ${actionText}`, false);
         }
       })
-      .catch(err => {
-        showStatus("Network error, please try again later.", false);
-        console.error(err);
-      })
-      .finally(() => {
-        btn.disabled = false;
-      });
+      .catch(err => showStatus("Error: " + err.message, false));
   }
 
   function submitLeave() {
@@ -237,12 +201,15 @@
     const url = `${scriptURL}?type=leave&employeeId=${encodeURIComponent(employeeId)}&leaveFrom=${encodeURIComponent(leaveFrom)}&leaveTo=${encodeURIComponent(leaveTo)}&days=${encodeURIComponent(days)}&leaveType=${encodeURIComponent(leaveType)}&reason=${encodeURIComponent(reason)}`;
 
     fetch(url)
-      .then(res => {
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        return res.json();
+      .then(res => res.json())
+      .then(data => {
+        if(data.status === 'success') {
+          showStatus("Successfully recorded Leave Request", true);
+        } else {
+          showStatus("Failed to record Leave Request", false);
+        }
       })
-      .then(data => showStatus(`Leave Request: ${data.status}`, data.status === 'success'))
-      .catch(err => showStatus("Network error, please try again later.", false));
+      .catch(err => showStatus("Error: " + err.message, false));
   }
 
   function submitSalary() {
@@ -254,12 +221,15 @@
     const url = `${scriptURL}?type=salary&employeeId=${encodeURIComponent(employeeId)}&amount=${encodeURIComponent(amount)}`;
 
     fetch(url)
-      .then(res => {
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        return res.json();
+      .then(res => res.json())
+      .then(data => {
+        if(data.status === 'success') {
+          showStatus("Successfully recorded Salary Advance request", true);
+        } else {
+          showStatus("Failed to record Salary Advance request", false);
+        }
       })
-      .then(data => showStatus(`Salary Advance: ${data.status}`, data.status === 'success'))
-      .catch(err => showStatus("Network error, please try again later.", false));
+      .catch(err => showStatus("Error: " + err.message, false));
   }
 </script>
 </body>
