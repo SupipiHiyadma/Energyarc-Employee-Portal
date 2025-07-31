@@ -164,16 +164,25 @@
     });
   });
 
-  function sendAttendance(action) {
-    clearStatus();
-    const employeeId = document.getElementById("attendanceEmployeeId").value;
-    if (!employeeId) return showStatus("Please enter Employee ID", false);
+ function sendAttendance(action) {
+  clearStatus();
+  const employeeId = document.getElementById("attendanceEmployeeId").value;
+  if (!employeeId) return showStatus("Please enter Employee ID", false);
 
-    fetch(`${scriptURL}?type=attendance&employeeId=${employeeId}&action=${action}`)
-      .then(res => res.json())
-      .then(data => showStatus(`Attendance: ${data.status}`, data.status === 'success'))
-      .catch(err => showStatus("Error: " + err.message, false));
-  }
+  fetch(`${scriptURL}?type=attendance&employeeId=${employeeId}&action=${action}`)
+    .then(res => res.json())
+    .then(data => {
+      const actionText = action === 'ClockIn' ? 'Clock In' :
+                         action === 'ClockOut' ? 'Clock Out' :
+                         action === 'Leave' ? 'Leave' : action;
+      if (data.status === 'success') {
+        showStatus(`Successfully recorded ${actionText}`, true);
+      } else {
+        showStatus(`Failed to record ${actionText}`, false);
+      }
+    })
+    .catch(err => showStatus("Error: " + err.message, false));
+}
 
   function submitLeave() {
     clearStatus();
