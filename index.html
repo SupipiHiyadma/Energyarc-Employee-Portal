@@ -59,6 +59,22 @@
     }
     #status.success { background-color: #d4edda; color: #155724; }
     #status.error { background-color: #f8d7da; color: #721c24; }
+
+    /* Spinner CSS */
+    @keyframes spinner {
+      to {transform: rotate(360deg);}
+    }
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 3px solid #ccc;
+      border-top-color: #007bff;
+      border-radius: 50%;
+      animation: spinner 0.6s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
   </style>
 </head>
 <body>
@@ -77,9 +93,9 @@
   <label for="attendanceEmployeeId">Employee ID:</label>
   <input type="text" id="attendanceEmployeeId" placeholder="Enter Employee ID" />
   <div id="att-buttons">
-    <button type="button" class="att-action-btn" style="background:#5bc0de;" onclick="sendAttendance('ClockIn')">Clock In</button>
-    <button type="button" class="att-action-btn" onclick="sendAttendance('ClockOut')">Clock Out</button>
-    <button type="button" class="att-action-btn" style="background:#f44336;" onclick="sendAttendance('Leave')">Leave</button>
+    <button type="button" class="att-action-btn" style="background:#5bc0de;" onclick="sendAttendance('ClockIn', this)">Clock In</button>
+    <button type="button" class="att-action-btn" onclick="sendAttendance('ClockOut', this)">Clock Out</button>
+    <button type="button" class="att-action-btn" style="background:#f44336;" onclick="sendAttendance('Leave', this)">Leave</button>
   </div>
 </form>
 
@@ -145,9 +161,13 @@
     status.className = '';
   }
 
-  function showStatus(message, isSuccess = true) {
+  function showStatus(message, isSuccess = true, isLoading = false) {
     const status = document.getElementById('status');
-    status.textContent = message;
+    if (isLoading) {
+      status.innerHTML = `<span class="spinner"></span> ${message}`;
+    } else {
+      status.textContent = message;
+    }
     status.className = isSuccess ? 'success' : 'error';
     status.style.display = 'block';
   }
@@ -164,34 +184,51 @@
     });
   });
 
- function sendAttendance(action) {
-  clearStatus();
-  const employeeId = document.getElementById("attendanceEmployeeId").value;
-  if (!employeeId) return showStatus("Please enter Employee ID", false);
+  function sendAttendance(action, btn) {
+    clearStatus();
+    const employeeId = document.getElementById("attendanceEmployeeId").value.trim();
+    if (!employeeId) return showStatus("Please enter Employee ID", false);
 
-  fetch(`${scriptURL}?type=attendance&employeeId=${employeeId}&action=${action}`)
-    .then(res => res.json())
-    .then(data => {
-      const actionText = action === 'ClockIn' ? 'Clock In' :
-                         action === 'ClockOut' ? 'Clock Out' :
-                         action === 'Leave' ? 'Leave' : action;
-      if (data.status === 'success') {
-        showStatus(`Successfully recorded ${actionText}`, true);
-      } else {
-        showStatus(`Failed to record ${actionText}`, false);
-      }
-    })
-    .catch(err => showStatus("Error: " + err.message, false));
-}
+    // Disable clicked button
+    btn.disabled = true;
+
+    // Show loading with spinner
+    showStatus("Processing " + action + "...", true, true);
+
+    fetch(`${scriptURL}?type=attendance&employeeId=${encodeURIComponent(employeeId)}&action=${encodeURIComponent(action)}`)
+      .then(res => {
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        if (data.status === 'success') {
+          const messages = {
+            ClockIn: "Successfully recorded Clock In",
+            ClockOut: "Successfully recorded Clock Out",
+            Leave: "Successfully recorded Leave",
+          };
+          showStatus(messages[action] || `Attendance: ${data.status}`, true);
+        } else {
+          showStatus(`Failed to record attendance: ${data.message || 'Unknown error'}`, false);
+        }
+      })
+      .catch(err => {
+        showStatus("Network error, please try again later.", false);
+        console.error(err);
+      })
+      .finally(() => {
+        btn.disabled = false;
+      });
+  }
 
   function submitLeave() {
     clearStatus();
-    const employeeId = document.getElementById("leaveEmployeeId").value;
+    const employeeId = document.getElementById("leaveEmployeeId").value.trim();
     const leaveFrom = document.getElementById("leaveFrom").value;
     const leaveTo = document.getElementById("leaveTo").value;
     const days = document.getElementById("leaveDays").value;
     const leaveType = document.getElementById("leaveType").value;
-    const reason = document.getElementById("leaveReason").value;
+    const reason = document.getElementById("leaveReason").value.trim();
 
     if (!employeeId || !leaveFrom || !leaveTo || !days || !leaveType || !reason) {
       return showStatus("Please fill all fields", false);
@@ -200,23 +237,29 @@
     const url = `${scriptURL}?type=leave&employeeId=${encodeURIComponent(employeeId)}&leaveFrom=${encodeURIComponent(leaveFrom)}&leaveTo=${encodeURIComponent(leaveTo)}&days=${encodeURIComponent(days)}&leaveType=${encodeURIComponent(leaveType)}&reason=${encodeURIComponent(reason)}`;
 
     fetch(url)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        return res.json();
+      })
       .then(data => showStatus(`Leave Request: ${data.status}`, data.status === 'success'))
-      .catch(err => showStatus("Error: " + err.message, false));
+      .catch(err => showStatus("Network error, please try again later.", false));
   }
 
   function submitSalary() {
     clearStatus();
-    const employeeId = document.getElementById("salaryEmployeeId").value;
+    const employeeId = document.getElementById("salaryEmployeeId").value.trim();
     const amount = document.getElementById("salaryAmount").value;
     if (!employeeId || !amount) return showStatus("Please fill all fields", false);
 
     const url = `${scriptURL}?type=salary&employeeId=${encodeURIComponent(employeeId)}&amount=${encodeURIComponent(amount)}`;
 
     fetch(url)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        return res.json();
+      })
       .then(data => showStatus(`Salary Advance: ${data.status}`, data.status === 'success'))
-      .catch(err => showStatus("Error: " + err.message, false));
+      .catch(err => showStatus("Network error, please try again later.", false));
   }
 </script>
 </body>
