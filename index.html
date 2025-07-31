@@ -1,283 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Employee Portal</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    max-width: 450px;
-    margin: 20px auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-  }
-  h2 {
-    text-align: center;
-  }
-  nav {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 20px;
-  }
-  nav button {
-    padding: 10px 20px;
-    cursor: pointer;
-    border: none;
-    background: #eee;
-    border-radius: 4px;
-    font-weight: bold;
-  }
-  nav button.active {
-    background: #2a9df4;
-    color: white;
-  }
-  form {
-    display: none;
-  }
-  form.active {
-    display: block;
-  }
-  input, select, textarea, button {
-    width: 100%;
-    padding: 10px;
-    margin: 8px 0;
-    box-sizing: border-box;
-    font-size: 1em;
-  }
-  button.submit-btn {
-    background-color: #2a9df4;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  #status {
-    margin-top: 15px;
-    padding: 10px;
-    border-radius: 4px;
-    text-align: center;
-    display: none;
-  }
-  #status.success {
-    background-color: #d4edda;
-    color: #155724;
-  }
-  #status.error {
-    background-color: #f8d7da;
-    color: #721c24;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Employee Portal</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .tab { display: none; }
+    .active { display: block; }
+    button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+    .clockin { background-color: #007BFF; color: white; }
+    .clockout { background-color: #0056b3; color: white; }
+    .leavebtn { background-color: #dc3545; color: white; }
+    .nav { margin-bottom: 20px; }
+    .nav button { background-color: #6c757d; color: white; }
+  </style>
 </head>
 <body>
+  <h2>Employee Portal</h2>
 
-<h2>Employee Portal</h2>
+  <div class="nav">
+    <button onclick="showTab('attendanceTab')">Attendance</button>
+    <button onclick="showTab('leaveTab')">Leave Request</button>
+    <button onclick="showTab('salaryTab')">Salary Advance</button>
+  </div>
 
-<nav>
-  <button id="tab-attendance" class="active">Attendance</button>
-  <button id="tab-leave">Leave Request</button>
-  <button id="tab-salary">Salary Advance</button>
-</nav>
+  <!-- Attendance Tab -->
+  <div id="attendanceTab" class="tab active">
+    <h3>Attendance</h3>
+    <input type="text" id="attendanceEmployeeId" placeholder="Employee ID"/><br/>
+    <button class="clockin" onclick="sendAttendance('ClockIn')">Clock In</button>
+    <button class="clockout" onclick="sendAttendance('ClockOut')">Clock Out</button>
+    <button class="leavebtn" onclick="sendAttendance('Leave')">Leave</button>
+  </div>
 
-<!-- Attendance Form -->
-<form id="form-attendance" class="active">
-  <input type="text" id="att-employeeId" placeholder="Employee ID" required />
-  <select id="att-action" required>
-    <option value="" disabled selected>Select Action</option>
-    <option value="Clock In">Clock In</option>
-    <option value="Clock Out">Clock Out</option>
-    <option value="Leave">Leave</option>
-  </select>
-  <button type="submit" class="submit-btn">Submit Attendance</button>
-</form>
+  <!-- Leave Request Tab -->
+  <div id="leaveTab" class="tab">
+    <h3>Leave Request</h3>
+    <input type="text" id="leaveEmployeeId" placeholder="Employee ID"/><br/>
+    <label>From: <input type="date" id="leaveFrom" /></label><br/>
+    <label>To: <input type="date" id="leaveTo" /></label><br/>
+    <input type="number" id="leaveDays" placeholder="Number of Days" /><br/>
+    <select id="leaveType">
+      <option value="">Select Leave Type</option>
+      <option value="Study">Study</option>
+      <option value="Medical">Medical</option>
+      <option value="Personal">Personal</option>
+      <option value="Funeral">Funeral</option>
+      <option value="Other">Other</option>
+    </select><br/>
+    <textarea id="leaveReason" placeholder="Reason for leave"></textarea><br/>
+    <button onclick="submitLeave()">Submit Leave</button>
+  </div>
 
-<!-- Leave Request Form -->
-<form id="form-leave">
-  <input type="text" id="leave-employeeId" placeholder="Employee ID" required />
-  <label>Request Date</label>
-  <input type="date" id="leave-requestDate" required />
-  <label>Leave From</label>
-  <input type="date" id="leave-leaveFrom" required />
-  <label>Leave To</label>
-  <input type="date" id="leave-leaveTo" required />
-  <input type="number" id="leave-days" placeholder="Number of Days" min="1" required />
-  <select id="leave-leaveType" required>
-    <option value="" disabled selected>Type of Leave</option>
-    <option value="Study">Study</option>
-    <option value="Medical">Medical</option>
-    <option value="Personal">Personal</option>
-    <option value="Funeral">Funeral</option>
-    <option value="Other">Other</option>
-  </select>
-  <textarea id="leave-reason" placeholder="Reason for Leave" rows="3" required></textarea>
-  <button type="submit" class="submit-btn">Submit Leave Request</button>
-</form>
+  <!-- Salary Advance Tab -->
+  <div id="salaryTab" class="tab">
+    <h3>Salary Advance</h3>
+    <input type="text" id="salaryEmployeeId" placeholder="Employee ID"/><br/>
+    <input type="number" id="salaryAmount" placeholder="Amount" /><br/>
+    <button onclick="submitSalary()">Request Advance</button>
+  </div>
 
-<!-- Salary Advance Form -->
-<form id="form-salary">
-  <input type="text" id="salary-employeeId" placeholder="Employee ID" required />
-  <label>Request Date</label>
-  <input type="date" id="salary-requestDate" required />
-  <input type="number" id="salary-amount" placeholder="Amount" min="1" required />
-  <button type="submit" class="submit-btn">Submit Salary Advance</button>
-</form>
+  <p id="status"></p>
 
-<div id="status"></div>
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzfcG1XyK_8pWbYSe7ufLytpHu0G0PJruqrZ3htr4E6BdMUCTri91bdU_p276URJP4P-g/exec";
 
-<script>
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwBjHqwqEXd0LcWEBLpOHhUCEjOjD7dGFI48zmjQgZtb1bKvviOTm_yiunDZreYq81dJA/exec";
-
-  // Tab switching
-  const tabs = {
-    attendance: document.getElementById('tab-attendance'),
-    leave: document.getElementById('tab-leave'),
-    salary: document.getElementById('tab-salary'),
-  };
-  const forms = {
-    attendance: document.getElementById('form-attendance'),
-    leave: document.getElementById('form-leave'),
-    salary: document.getElementById('form-salary'),
-  };
-  const statusDiv = document.getElementById('status');
-
-  function clearStatus() {
-    statusDiv.style.display = 'none';
-    statusDiv.textContent = '';
-    statusDiv.className = '';
-  }
-
-  function showStatus(message, isSuccess) {
-    statusDiv.style.display = 'block';
-    statusDiv.textContent = message;
-    statusDiv.className = isSuccess ? 'success' : 'error';
-  }
-
-  function switchTab(tab) {
-    clearStatus();
-    for (let key in tabs) {
-      tabs[key].classList.toggle('active', key === tab);
-      forms[key].classList.toggle('active', key === tab);
-    }
-  }
-
-  tabs.attendance.addEventListener('click', () => switchTab('attendance'));
-  tabs.leave.addEventListener('click', () => switchTab('leave'));
-  tabs.salary.addEventListener('click', () => switchTab('salary'));
-
-  // Attendance form submit
-  forms.attendance.addEventListener('submit', e => {
-    e.preventDefault();
-    clearStatus();
-    const employeeId = document.getElementById('att-employeeId').value.trim();
-    const action = document.getElementById('att-action').value;
-
-    if (!employeeId || !action) {
-      showStatus('Please enter Employee ID and select an action.', false);
-      return;
+    function showTab(id) {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.getElementById("status").textContent = "";
     }
 
-    const params = new URLSearchParams({
-      type: 'attendance',
-      employeeId,
-      action
-    });
+    function sendAttendance(action) {
+      const employeeId = document.getElementById("attendanceEmployeeId").value;
+      if (!employeeId) return alert("Please enter Employee ID");
 
-    fetch(WEB_APP_URL + "?" + params.toString())
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === 'success') {
-          showStatus(`Attendance recorded: ${action} for ${employeeId}`, true);
-          forms.attendance.reset();
-        } else {
-          showStatus(`Error: ${data.error || 'Unknown error'}`, false);
-        }
-      })
-      .catch(err => {
-        showStatus(`Error sending data: ${err.message}`, false);
-      });
-  });
-
-  // Leave form submit
-  forms.leave.addEventListener('submit', e => {
-    e.preventDefault();
-    clearStatus();
-
-    const employeeId = document.getElementById('leave-employeeId').value.trim();
-    const requestDate = document.getElementById('leave-requestDate').value;
-    const leaveFrom = document.getElementById('leave-leaveFrom').value;
-    const leaveTo = document.getElementById('leave-leaveTo').value;
-    const days = document.getElementById('leave-days').value;
-    const leaveType = document.getElementById('leave-leaveType').value;
-    const reason = document.getElementById('leave-reason').value.trim();
-
-    if (!employeeId || !requestDate || !leaveFrom || !leaveTo || !days || !leaveType || !reason) {
-      showStatus('Please fill in all leave request fields.', false);
-      return;
+      fetch(`${scriptURL}?type=attendance&employeeId=${employeeId}&action=${action}`)
+        .then(res => res.json())
+        .then(data => document.getElementById("status").textContent = data.status)
+        .catch(err => document.getElementById("status").textContent = "Error: " + err.message);
     }
 
-    const params = new URLSearchParams({
-      type: 'leave',
-      employeeId,
-      requestDate,
-      leaveFrom,
-      leaveTo,
-      days,
-      leaveType,
-      reason
-    });
+    function submitLeave() {
+      const employeeId = document.getElementById("leaveEmployeeId").value;
+      const leaveFrom = document.getElementById("leaveFrom").value;
+      const leaveTo = document.getElementById("leaveTo").value;
+      const days = document.getElementById("leaveDays").value;
+      const leaveType = document.getElementById("leaveType").value;
+      const reason = document.getElementById("leaveReason").value;
 
-    fetch(WEB_APP_URL + "?" + params.toString())
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === 'success') {
-          showStatus(`Leave request submitted for ${employeeId}`, true);
-          forms.leave.reset();
-        } else {
-          showStatus(`Error: ${data.error || 'Unknown error'}`, false);
-        }
-      })
-      .catch(err => {
-        showStatus(`Error sending data: ${err.message}`, false);
-      });
-  });
+      if (!employeeId || !leaveFrom || !leaveTo || !days || !leaveType || !reason) {
+        return alert("Please fill all fields");
+      }
 
-  // Salary Advance form submit
-  forms.salary.addEventListener('submit', e => {
-    e.preventDefault();
-    clearStatus();
+      const url = `${scriptURL}?type=leave&employeeId=${encodeURIComponent(employeeId)}&leaveFrom=${encodeURIComponent(leaveFrom)}&leaveTo=${encodeURIComponent(leaveTo)}&days=${encodeURIComponent(days)}&leaveType=${encodeURIComponent(leaveType)}&reason=${encodeURIComponent(reason)}`;
 
-    const employeeId = document.getElementById('salary-employeeId').value.trim();
-    const requestDate = document.getElementById('salary-requestDate').value;
-    const amount = document.getElementById('salary-amount').value;
-
-    if (!employeeId || !requestDate || !amount) {
-      showStatus('Please fill in all salary advance fields.', false);
-      return;
+      fetch(url)
+        .then(res => res.json())
+        .then(data => document.getElementById("status").textContent = data.status)
+        .catch(err => document.getElementById("status").textContent = "Error: " + err.message);
     }
 
-    const params = new URLSearchParams({
-      type: 'salary',
-      employeeId,
-      requestDate,
-      amount
-    });
+    function submitSalary() {
+      const employeeId = document.getElementById("salaryEmployeeId").value;
+      const amount = document.getElementById("salaryAmount").value;
+      if (!employeeId || !amount) return alert("Please fill all fields");
 
-    fetch(WEB_APP_URL + "?" + params.toString())
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === 'success') {
-          showStatus(`Salary advance request submitted for ${employeeId}`, true);
-          forms.salary.reset();
-        } else {
-          showStatus(`Error: ${data.error || 'Unknown error'}`, false);
-        }
-      })
-      .catch(err => {
-        showStatus(`Error sending data: ${err.message}`, false);
-      });
-  });
-</script>
+      const url = `${scriptURL}?type=salary&employeeId=${encodeURIComponent(employeeId)}&amount=${encodeURIComponent(amount)}`;
 
+      fetch(url)
+        .then(res => res.json())
+        .then(data => document.getElementById("status").textContent = data.status)
+        .catch(err => document.getElementById("status").textContent = "Error: " + err.message);
+    }
+  </script>
 </body>
 </html>
