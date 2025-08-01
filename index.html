@@ -7,83 +7,90 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: #f9f9f9;
+      max-width: 600px;
+      margin: 20px auto;
     }
-    .container {
-      max-width: 400px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+
     nav {
-      display: flex;
-      justify-content: space-between;
       margin-bottom: 20px;
+      text-align: center;
     }
+
     nav button {
-      flex: 1;
-      padding: 10px;
-      margin: 0 5px;
-      background: #f0f0f0;
-      border: none;
-      border-radius: 5px;
+      padding: 10px 20px;
+      margin-right: 5px;
       cursor: pointer;
-      font-weight: bold;
+      border: 1px solid #ccc;
+      background: #f0f0f0;
+      border-radius: 4px;
     }
+
     nav button.active {
       background: #007bff;
       color: white;
+      border-color: #007bff;
     }
+
     form {
       display: none;
     }
+
     form.active {
       display: block;
     }
-    label {
-      font-weight: bold;
-    }
+
     input, select, textarea {
       width: 100%;
-      padding: 10px;
-      margin: 8px 0 15px;
+      padding: 8px;
+      margin-top: 8px;
+      margin-bottom: 15px;
+      border-radius: 4px;
       border: 1px solid #ccc;
-      border-radius: 5px;
       box-sizing: border-box;
     }
+
     .att-action-btn {
       width: 100%;
       padding: 12px;
-      background: #007bff;
       border: none;
       border-radius: 5px;
       color: white;
       font-weight: bold;
       cursor: pointer;
     }
-    .att-action-btn:hover {
+
+    .btn-clockin {
+      background: #007bff;
+    }
+
+    .btn-clockin:hover {
       background: #0056b3;
     }
+
+    .btn-clockout {
+      background: #28a745;
+    }
+
+    .btn-clockout:hover {
+      background: #218838;
+    }
+
     .leave-btn {
       background: #f0ad4e;
     }
+
     .leave-btn:hover {
       background: #ec971f;
     }
+
     .leave-submit-btn {
-      background: #28a745;
+      background: #007bff;
     }
+
     .leave-submit-btn:hover {
-      background: #218838;
+      background: #0056b3;
     }
+
     #att-buttons {
       display: flex;
       flex-direction: column;
@@ -91,17 +98,19 @@
       margin-top: -10px;
       margin-bottom: 20px;
     }
+
     #status {
       padding: 10px;
       border-radius: 4px;
       margin-bottom: 20px;
       display: none;
-      text-align: center;
     }
+
     #status.success {
       background-color: #d4edda;
       color: #155724;
     }
+
     #status.error {
       background-color: #f8d7da;
       color: #721c24;
@@ -109,187 +118,186 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Employee Portal</h2>
-    <nav>
-      <button id="tab-attendance" class="active">Attendance</button>
-      <button id="tab-leave">Leave</button>
-      <button id="tab-salary">Advance</button>
-    </nav>
 
-    <div id="status"></div>
+<h2>Employee Portal</h2>
 
-    <!-- Attendance Form -->
-    <form id="form-attendance" class="active">
-      <label for="attendanceEmployeeId">Employee ID:</label>
-      <input type="text" id="attendanceEmployeeId" placeholder="Enter Employee ID" />
-      <div id="att-buttons">
-        <button type="button" class="att-action-btn" onclick="sendAttendance('ClockIn', this)">Clock In</button>
-        <button type="button" class="att-action-btn" onclick="sendAttendance('ClockOut', this)">Clock Out</button>
-        <button type="button" class="att-action-btn leave-btn" onclick="sendAttendance('Leave', this)">Mark Leave</button>
-      </div>
-    </form>
+<nav>
+  <button id="tab-attendance" class="active">Attendance</button>
+  <button id="tab-leave">Leave Request</button>
+  <button id="tab-salary">Salary Advance</button>
+</nav>
 
-    <!-- Leave Form -->
-    <form id="form-leave">
-      <label for="leaveEmployeeId">Employee ID:</label>
-      <input type="text" id="leaveEmployeeId" placeholder="Enter Employee ID" />
+<div id="status"></div>
 
-      <label>From:</label>
-      <input type="date" id="leaveFrom" />
-
-      <label>To:</label>
-      <input type="date" id="leaveTo" />
-
-      <label>Number of Days:</label>
-      <input type="number" id="leaveDays" placeholder="Number of Days" />
-
-      <label>Leave Type:</label>
-      <select id="leaveType">
-        <option value="">Select Leave Type</option>
-        <option value="Study">Study</option>
-        <option value="Medical">Medical</option>
-        <option value="Personal">Personal</option>
-        <option value="Funeral">Funeral</option>
-        <option value="Other">Other</option>
-      </select>
-
-      <label>Reason:</label>
-      <textarea id="leaveReason" rows="3" placeholder="Reason for leave"></textarea>
-
-      <button type="button" class="att-action-btn leave-submit-btn" onclick="submitLeave(this)">Submit Leave Request</button>
-    </form>
-
-    <!-- Salary Advance Form -->
-    <form id="form-salary">
-      <label for="salaryEmployeeId">Employee ID:</label>
-      <input type="text" id="salaryEmployeeId" placeholder="Enter Employee ID" />
-
-      <label for="salaryAmount">Amount:</label>
-      <input type="number" id="salaryAmount" placeholder="Amount" />
-
-      <button type="button" class="att-action-btn" onclick="submitSalary(this)">Request Advance</button>
-    </form>
+<!-- Attendance -->
+<form id="form-attendance" class="active">
+  <label for="attendanceEmployeeId">Employee ID:</label>
+  <input type="text" id="attendanceEmployeeId" placeholder="Enter Employee ID" />
+  <div id="att-buttons">
+    <button type="button" class="att-action-btn btn-clockin" onclick="sendAttendance('ClockIn', this)">Clock In</button>
+    <button type="button" class="att-action-btn btn-clockout" onclick="sendAttendance('ClockOut', this)">Clock Out</button>
+    <button type="button" class="att-action-btn leave-btn" onclick="sendAttendance('Leave', this)">Mark Leave</button>
   </div>
+</form>
 
-  <script>
-    const scriptURL = "https://script.google.com/macros/s/YOUR_SCRIPT_URL_HERE/exec";
+<!-- Leave -->
+<form id="form-leave">
+  <label for="leaveEmployeeId">Employee ID:</label>
+  <input type="text" id="leaveEmployeeId" placeholder="Enter Employee ID"/>
 
-    const tabs = {
-      attendance: document.getElementById('form-attendance'),
-      leave: document.getElementById('form-leave'),
-      salary: document.getElementById('form-salary'),
-    };
-    const tabButtons = {
-      attendance: document.getElementById('tab-attendance'),
-      leave: document.getElementById('tab-leave'),
-      salary: document.getElementById('tab-salary'),
-    };
+  <label>From:</label>
+  <input type="date" id="leaveFrom" />
 
-    function clearStatus() {
-      const status = document.getElementById('status');
-      status.style.display = 'none';
-      status.textContent = '';
-      status.className = '';
-    }
+  <label>To:</label>
+  <input type="date" id="leaveTo" />
 
-    function showStatus(message, isSuccess = true) {
-      const status = document.getElementById('status');
-      status.textContent = message;
-      status.className = isSuccess ? 'success' : 'error';
-      status.style.display = 'block';
-    }
+  <label>Number of Days:</label>
+  <input type="number" id="leaveDays" placeholder="Number of Days" />
 
-    Object.keys(tabButtons).forEach(key => {
-      tabButtons[key].addEventListener('click', () => {
-        clearStatus();
-        Object.values(tabButtons).forEach(btn => btn.classList.remove('active'));
-        tabButtons[key].classList.add('active');
+  <label>Leave Type:</label>
+  <select id="leaveType">
+    <option value="">Select Leave Type</option>
+    <option value="Study">Study</option>
+    <option value="Medical">Medical</option>
+    <option value="Personal">Personal</option>
+    <option value="Funeral">Funeral</option>
+    <option value="Other">Other</option>
+  </select>
 
-        Object.keys(tabs).forEach(formKey => {
-          tabs[formKey].classList.toggle('active', formKey === key);
-        });
+  <label>Reason:</label>
+  <textarea id="leaveReason" rows="3" placeholder="Reason for leave"></textarea>
+
+  <button type="button" class="att-action-btn leave-submit-btn" onclick="submitLeave(this)">Submit Leave Request</button>
+</form>
+
+<!-- Salary -->
+<form id="form-salary">
+  <label for="salaryEmployeeId">Employee ID:</label>
+  <input type="text" id="salaryEmployeeId" placeholder="Enter Employee ID" />
+
+  <label for="salaryAmount">Amount:</label>
+  <input type="number" id="salaryAmount" placeholder="Amount" />
+
+  <button type="button" class="att-action-btn btn-clockin" onclick="submitSalary(this)">Request Advance</button>
+</form>
+
+<script>
+  const scriptURL = "https://script.google.com/macros/s/AKfycbzfcG1XyK_8pWbYSe7ufLytpHu0G0PJruqrZ3htr4E6BdMUCTri91bdU_p276URJP4P-g/exec";
+
+  const tabs = {
+    attendance: document.getElementById('form-attendance'),
+    leave: document.getElementById('form-leave'),
+    salary: document.getElementById('form-salary'),
+  };
+  const tabButtons = {
+    attendance: document.getElementById('tab-attendance'),
+    leave: document.getElementById('tab-leave'),
+    salary: document.getElementById('tab-salary'),
+  };
+
+  function clearStatus() {
+    const status = document.getElementById('status');
+    status.style.display = 'none';
+    status.textContent = '';
+    status.className = '';
+  }
+
+  function showStatus(message, isSuccess = true) {
+    const status = document.getElementById('status');
+    status.textContent = message;
+    status.className = isSuccess ? 'success' : 'error';
+    status.style.display = 'block';
+  }
+
+  Object.keys(tabButtons).forEach(key => {
+    tabButtons[key].addEventListener('click', () => {
+      clearStatus();
+      Object.values(tabButtons).forEach(btn => btn.classList.remove('active'));
+      tabButtons[key].classList.add('active');
+      Object.keys(tabs).forEach(formKey => {
+        tabs[formKey].classList.toggle('active', formKey === key);
       });
     });
+  });
 
-    function sendAttendance(action, btn) {
-      clearStatus();
-      const employeeId = document.getElementById("attendanceEmployeeId").value;
-      if (!employeeId) return showStatus("Please enter Employee ID", false);
+  function sendAttendance(action, btn) {
+    clearStatus();
+    const employeeId = document.getElementById("attendanceEmployeeId").value;
+    if (!employeeId) return showStatus("Please enter Employee ID", false);
 
-      btn.disabled = true;
-      showStatus("Processing...", true);
+    btn.disabled = true;
+    showStatus("Processing...", true);
 
-      fetch(`${scriptURL}?type=attendance&employeeId=${employeeId}&action=${action}`)
-        .then(res => res.json())
-        .then(data => {
-          const actionText = action === 'ClockIn' ? 'Clock In' :
-                            action === 'ClockOut' ? 'Clock Out' :
-                            action === 'Leave' ? 'Leave' : action;
-          if (data.status === 'success') {
-            showStatus(`Successfully recorded ${actionText}`, true);
-          } else {
-            showStatus(`Failed to record ${actionText}`, false);
-          }
-        })
-        .catch(() => showStatus("Network error, please try again later.", false))
-        .finally(() => btn.disabled = false);
+    fetch(`${scriptURL}?type=attendance&employeeId=${employeeId}&action=${action}`)
+      .then(res => res.json())
+      .then(data => {
+        const actionText = action === 'ClockIn' ? 'Clock In' :
+                          action === 'ClockOut' ? 'Clock Out' :
+                          action === 'Leave' ? 'Leave' : action;
+        if (data.status === 'success') {
+          showStatus(`Successfully recorded ${actionText}`, true);
+        } else {
+          showStatus(`Failed to record ${actionText}`, false);
+        }
+      })
+      .catch(() => showStatus("Network error, please try again later.", false))
+      .finally(() => btn.disabled = false);
+  }
+
+  function submitLeave(btn) {
+    clearStatus();
+    const employeeId = document.getElementById("leaveEmployeeId").value;
+    const leaveFrom = document.getElementById("leaveFrom").value;
+    const leaveTo = document.getElementById("leaveTo").value;
+    const days = document.getElementById("leaveDays").value;
+    const leaveType = document.getElementById("leaveType").value;
+    const reason = document.getElementById("leaveReason").value;
+
+    if (!employeeId || !leaveFrom || !leaveTo || !days || !leaveType || !reason) {
+      return showStatus("Please fill all fields", false);
     }
 
-    function submitLeave(btn) {
-      clearStatus();
-      const employeeId = document.getElementById("leaveEmployeeId").value;
-      const leaveFrom = document.getElementById("leaveFrom").value;
-      const leaveTo = document.getElementById("leaveTo").value;
-      const days = document.getElementById("leaveDays").value;
-      const leaveType = document.getElementById("leaveType").value;
-      const reason = document.getElementById("leaveReason").value;
+    btn.disabled = true;
+    showStatus("Submitting leave request...", true);
 
-      if (!employeeId || !leaveFrom || !leaveTo || !days || !leaveType || !reason) {
-        return showStatus("Please fill all fields", false);
-      }
+    const url = `${scriptURL}?type=leave&employeeId=${encodeURIComponent(employeeId)}&leaveFrom=${encodeURIComponent(leaveFrom)}&leaveTo=${encodeURIComponent(leaveTo)}&days=${encodeURIComponent(days)}&leaveType=${encodeURIComponent(leaveType)}&reason=${encodeURIComponent(reason)}`;
 
-      btn.disabled = true;
-      showStatus("Submitting leave request...", true);
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          showStatus("Successfully recorded Leave Request", true);
+        } else {
+          showStatus("Failed to record Leave Request", false);
+        }
+      })
+      .catch(() => showStatus("Network error, please try again later.", false))
+      .finally(() => btn.disabled = false);
+  }
 
-      const url = `${scriptURL}?type=leave&employeeId=${encodeURIComponent(employeeId)}&leaveFrom=${encodeURIComponent(leaveFrom)}&leaveTo=${encodeURIComponent(leaveTo)}&days=${encodeURIComponent(days)}&leaveType=${encodeURIComponent(leaveType)}&reason=${encodeURIComponent(reason)}`;
+  function submitSalary(btn) {
+    clearStatus();
+    const employeeId = document.getElementById("salaryEmployeeId").value;
+    const amount = document.getElementById("salaryAmount").value;
+    if (!employeeId || !amount) return showStatus("Please fill all fields", false);
 
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          if (data.status === 'success') {
-            showStatus("Successfully recorded Leave Request", true);
-          } else {
-            showStatus("Failed to record Leave Request", false);
-          }
-        })
-        .catch(() => showStatus("Network error, please try again later.", false))
-        .finally(() => btn.disabled = false);
-    }
+    btn.disabled = true;
+    showStatus("Submitting salary request...", true);
 
-    function submitSalary(btn) {
-      clearStatus();
-      const employeeId = document.getElementById("salaryEmployeeId").value;
-      const amount = document.getElementById("salaryAmount").value;
-      if (!employeeId || !amount) return showStatus("Please fill all fields", false);
+    const url = `${scriptURL}?type=salary&employeeId=${encodeURIComponent(employeeId)}&amount=${encodeURIComponent(amount)}`;
 
-      btn.disabled = true;
-      showStatus("Submitting salary request...", true);
-
-      const url = `${scriptURL}?type=salary&employeeId=${encodeURIComponent(employeeId)}&amount=${encodeURIComponent(amount)}`;
-
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          if (data.status === 'success') {
-            showStatus("Successfully recorded Salary Advance", true);
-          } else {
-            showStatus("Failed to record Salary Advance", false);
-          }
-        })
-        .catch(() => showStatus("Network error, please try again later.", false))
-        .finally(() => btn.disabled = false);
-    }
-  </script>
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          showStatus("Successfully recorded Salary Advance", true);
+        } else {
+          showStatus("Failed to record Salary Advance", false);
+        }
+      })
+      .catch(() => showStatus("Network error, please try again later.", false))
+      .finally(() => btn.disabled = false);
+  }
+</script>
 </body>
 </html>
